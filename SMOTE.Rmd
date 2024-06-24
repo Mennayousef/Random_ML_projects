@@ -1,0 +1,72 @@
+---
+title: "SMOTE"
+output: html_document
+date: "2024-06-24"
+---
+```{r}
+rm(list=ls())
+```
+
+```{r}
+# load the Iris dataset
+data(iris)
+```
+
+```{r}
+## For SMOTE algorithm
+library(smotefamily)
+## For testing class prediction
+library(caret)
+## For formatting and plotting purposes
+library(tibble)
+library(scales)
+library(ggplot2)
+```
+```{r}
+selected_data <- iris[c(1,2,5)]
+```
+
+```{r}
+table(selected_data$Species)
+```
+```{r}
+# Re-name the versicolor/ virginica species to 'common' and the setosa species to 'rare'
+selected_data$Species <- factor(ifelse(selected_data$Species == 'setosa','rare','common'))
+```
+
+```{r}
+table(selected_data$Species)
+```
+```{r}
+# check the class distribution of the imbalanced dataset
+prop.table(table(selected_data$Species))
+```
+```{r}
+data.smote <- SLS(selected_data[,-3],selected_data[,3],K=7,C=5)
+```
+```{r}
+data.smote <- data.smote$data
+```
+
+```{r}
+dim(data.smote)
+```
+```{r}
+# check the class distribution after applying SMOTE
+prop.table(table(data.smote$class))
+```
+```{r}
+# plot the effect of SMOTE
+hue_pal()(2)
+myColNames <- c(hue_pal()(2))[as.factor(selected_data$Species)]
+## Colour names for the SMOTE transformed data
+myColNames.2 <- c(hue_pal()(2))[as.factor(data.smote$class)]
+## Create and store the plot in PDF
+pdf("smote_transform_IrisData.pdf",width=5,height=4)
+par(mfrow=c(1,2),cex=0.5)
+plot(selected_data$Sepal.Length,selected_data$Sepal.Width,col= alpha(myColNames,0.35),pch=19,cex=0.75,main="Iris, original data")
+plot(data.smote$Sepal.Length,data.smote$Sepal.Width,col= alpha(myColNames.2,0.35),pch=19,cex=0.75,main="Iris, SMOTE transformed")
+dev.off()
+```
+
+
